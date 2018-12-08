@@ -1,0 +1,14 @@
+version: '3'
+services:
+  nginx:
+    image: nginx
+#    environment:
+#      TPATH: /home/dockerTest
+#      HTTP_ADDR: ":81"
+    ports:
+    - 80:80
+#    - 443:443
+#    - 4443:4443
+    volumes:
+    - $DOCKER_V_PATH/nginx/www:/www
+    - $DOCKER_V_PATH/nginx/conf.d:/etc/nginx/conf.d
