@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--该文件为iOS发布的配置模板,已经包含了常用的构建步骤,放到映射目录中,默认情况下为:/Users/YourName/docker-volumes/TeamCity-Publish-iOS/teamcity/data/config/projects/_Root/buildTypes/IOSPublish.xml-->
+<template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="41f75663-bd84-4e11-bc80-6f08c1e6e499"
+          xsi:noNamespaceSchemaLocation="http://www.jetbrains.com/teamcity/schemas/2018.1/project-config.xsd">
+    <name>iOSPublish</name>
+    <description>iOS发布模板</description>
+    <settings>
+        <options>
+            <option name="artifactRules" value="Archive/%build.number%/iOS.png"/>
+        </options>
+        <parameters>
+            <param name="bundleId" value="修改为项目bundleId,上传fir用"
+                   spec="text display='hidden' validationMode='not_empty'"/>
+            <param name="firApiToken" value="修改为fir的token,注册后即可获得"
+                   spec="text display='hidden' validationMode='not_empty'"/>
+            <param name="firChangeLog" value="删除此行文字,滞空即可,在打包的时候手动输入即可,会显示在fir更新说明中"
+                   spec="text display='normal' validationMode='any'"/>
+            <param name="firSubUrl" value="先手动上传一次fir,获取到子域名后覆盖这里"
+                   spec="text validationMode='not_empty' display='hidden'"/>
+            <param name="scheme"
+                   value="点击Edit,进去后再点击Edit,默认为选择模式,左边为teamcity打包的时候显示选择的项,=&gt;符号右边为对应scheme名字,此行删除,并设置为需要默认的scheme名"
+                   spec="select label_3='|0x751f|0x4ea7|0x73af|0x5883' data_1='testSchemeName' label_1='|0x6d4b|0x8bd5|0x73af|0x5883' display='normal' data_3='productSchemeName'"/>
+            <param name="workspaceName" value="项目的workspace名" spec="text validationMode='not_empty' display='hidden'"/>
+        </parameters>
+        <build-runners>
+            <runner id="RUNNER_4" name="pod install" type="simpleRunner">
+                <parameters>
+                    <param name="script.content"><![CDATA[export LANG=en_US.UTF-8;
+pod install]]></param>
+                    <param name="teamcity.step.mode" value="default"/>
+                    <param name="use.custom.script" value="true"/>
+                </parameters>
+            </runner>
+            <runner id="RUNNER_1" name="编译压缩" type="simpleRunner">
+                <parameters>
+                    <param name="script.content"
+                           value="xcodebuild -workspace %workspaceName%.xcworkspace -scheme %scheme% clean archive -archivePath Archive/%build.number%/%scheme%.xcarchive"/>
+                    <param name="teamcity.step.mode" value="default"/>
+                    <param name="use.custom.script" value="true"/>
+                </parameters>
+            </runner>
+            <runner id="RUNNER_2" name="导出ipa" type="simpleRunner">
+                <parameters>
+                    <param name="script.content"
+                           value="xcodebuild -exportArchive -archivePath %scheme%.xcarchive -exportOptionsPlist ../../exportOptionsPlist/%scheme%.plist -exportPath ./"/>
+                    <param name="teamcity.build.workingDir" value="Archive/%build.number%"/>
+                    <param name="teamcity.step.mode" value="default"/>
+                    <param name="use.custom.script" value="true"/>
+                </parameters>
+            </runner>
+            <runner id="RUNNER_3" name="fir上传" type="simpleRunner">
+                <parameters>
+                    <param name="script.content"><![CDATA[# 结束后即生产环境名字为空,打包上传不用添加后缀
+echo "获取fir上传token中.......";
+curl -o fir.json \
+     -X "POST" "http://api.fir.im/apps" \
+     -H "Content-Type: application/json" \
+     -d "{\"type\":\"ios\", \"bundle_id\":\"%bundleId%\", \"api_token\":\"%firApiToken%\"}"
+echo "获取token成功,开始上传包...";
+#上传包
+id=$(jq -r '.cert.icon' fir.json);
+ipaKey=$(jq -r '.cert.binary.key' fir.json);
+ipaToken=$(jq -r '.cert.binary.token' fir.json);
+ipaUrl=$(jq -r '.cert.binary.upload_url' fir.json);
+
+curl   -o response.json             \
+       -F "key=$ipaKey"              \
+       -F "token=$ipaToken"             \
+       -F "file=@%scheme%.ipa"            \
+       -F "x:name=%system.teamcity.projectName%"             \
+       -F "x:build=%build.number%"             \
+       -F "x:release_type=Adhoc"   \
+       -F "x:changelog=%firChangeLog%"       \
+       $ipaUrl;
+releaseId=$(jq -r '.release_id' response.json);
+ipaPath=https://fir.im/%firSubUrl%?release_id=${releaseId};
+echo "包上传完成,开始生成二维码...";
+qrencode -o iOS.png -s 100 $ipaPath;
+echo "二维码生成完成."]]></param>
+                    <param name="teamcity.build.workingDir" value="Archive/%build.number%"/>
+                    <param name="teamcity.step.mode" value="default"/>
+                    <param name="use.custom.script" value="true"/>
+                </parameters>
+            </runner>
+        </build-runners>
+        <vcs-settings/>
+        <requirements/>
+        <build-triggers/>
+        <cleanup/>
+    </settings>
+</template>
+

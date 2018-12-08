@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<meta-runner name="iOSPublish">
+    <description>发布iOS配置模板</description>
+    <settings>
+        <parameters>
+            <param name="bundleId" value="com.crfchina.lifeloans" spec="text display='normal' description='1' label='1' validationMode='any'" />
+            <param name="firApiToken" value="0281256b84e8c9c6614851f36a82d9f8" />
+            <param name="firChangeLog" value="" />
+            <param name="firSubUrl" value="sp7f" />
+            <param name="scheme" value="Test" spec="select label_3='|0x751f|0x4ea7|0x73af|0x5883' display='normal' description='|0x9009|0x62e9|0x9700|0x8981|0x6253|0x5305|0x7684|0x73af|0x5883' label='|0x73af|0x5883|0x9009|0x62e9' data_1='Test' label_1='|0x6d4b|0x8bd5|0x73af|0x5883' data_3='Product'" />
+            <param name="workspaceName" value="CRFLifeCredit" />
+        </parameters>
+        <build-runners>
+            <runner name="编译压缩" type="simpleRunner">
+                <parameters>
+                    <param name="script.content" value="xcodebuild -workspace %workspaceName%.xcworkspace -scheme %scheme% clean archive -archivePath Archive/%build.number%/%scheme%.xcarchive" />
+                    <param name="teamcity.step.mode" value="default" />
+                    <param name="use.custom.script" value="true" />
+                </parameters>
+            </runner>
+            <runner name="导出ipa" type="simpleRunner">
+                <parameters>
+                    <param name="script.content" value="xcodebuild -exportArchive -archivePath %scheme%.xcarchive -exportOptionsPlist ../../exportOptionsPlist/%scheme%.plist -exportPath ./" />
+                    <param name="teamcity.build.workingDir" value="Archive/%build.number%" />
+                    <param name="teamcity.step.mode" value="default" />
+                    <param name="use.custom.script" value="true" />
+                </parameters>
+            </runner>
+            <runner name="fir上传" type="simpleRunner">
+                <parameters>
+                    <param name="script.content"><![CDATA[# 结束后即生产环境名字为空,打包上传不用添加后缀
+echo "获取fir上传token中.......";
+curl -o fir.json \
+     -X "POST" "http://api.fir.im/apps" \
+     -H "Content-Type: application/json" \
+     -d "{\"type\":\"ios\", \"bundle_id\":\"%bundleId%\", \"api_token\":\"%firApiToken%\"}"
+echo "获取token成功,开始上传包...";
+#上传包
+id=$(jq -r '.cert.icon' fir.json);
+ipaKey=$(jq -r '.cert.binary.key' fir.json);
+ipaToken=$(jq -r '.cert.binary.token' fir.json);
+ipaUrl=$(jq -r '.cert.binary.upload_url' fir.json);
+
+curl   -o response.json             \
+       -F "key=$ipaKey"              \
+       -F "token=$ipaToken"             \
+       -F "file=@%scheme%.ipa"            \
+       -F "x:name=%system.teamcity.projectName%"             \
+       -F "x:build=%build.number%"             \
+       -F "x:release_type=Adhoc"   \
+       -F "x:changelog=%firChangeLog%"       \
+       $ipaUrl;
+releaseId=$(jq -r '.release_id' response.json);
+ipaPath=https://fir.im/%firSubUrl%?release_id=${releaseId};
+echo "包上传完成,开始生成二维码...";
+qrencode -o iOS.png -s 100 $ipaPath;
+echo "二维码生成完成."]]></param>
+                    <param name="teamcity.build.workingDir" value="Archive/%build.number%" />
+                    <param name="teamcity.step.mode" value="default" />
+                    <param name="use.custom.script" value="true" />
+                </parameters>
+            </runner>
+        </build-runners>
+        <requirements />
+    </settings>
+</meta-runner>
