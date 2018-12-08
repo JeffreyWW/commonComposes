@@ -1,0 +1,22 @@
+server_addr: "tunnel.jeffreywei.cn:4443"
+trust_host_root_certs: false
+tunnels:
+  webapp:
+    proto:
+      http: 80
+    subdomain: test
+  ssh:
+    remote_port: 38721
+    proto:
+      tcp: 22
+  fuck:
+    proto:
+      tcp: 91
+  teamcity:
+    proto:
+#      remote_port: 39917
+      http: 8111
+#      subdomain: test
+
+
+
