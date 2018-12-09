@@ -12,3 +12,5 @@ services:
     volumes:
     - $DOCKER_V_PATH/ngrok/files:/myfiles
     command: [ "/bin/sh", "/server.sh" ]
+
+
