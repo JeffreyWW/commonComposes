@@ -4,9 +4,9 @@ services:
     image: hteen/ngrok
     environment:
       DOMAIN: "tunnel.jeffreywei.cn"
-      HTTP_ADDR: ":81"
+      HTTP_ADDR: ":82"
     ports:
-    - 81:81
+    - 82:82
     - 443:443
     - 4443:4443
     volumes:
