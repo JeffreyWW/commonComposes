@@ -1,0 +1,7 @@
+version: '3'
+services:
+  alpine:
+    image: alpine
+    volumes:
+      - $DOCKER_V_PATH:/data/vtest
+
