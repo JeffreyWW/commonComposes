@@ -2,18 +2,16 @@ version: '3'
 services:
   mysql:
     env_file:
-    - mysql.env
+      - mysql.env
     image: mysql:5.6
     volumes:
-    - $DOCKER_V_PATH/teamcity-publish-iOS/mysql/data:/var/lib/mysql
-    ports:
-    - 3306:3306
+      - $DOCKER_V_PATH/teamcity-publish-iOS/mysql/data:/var/lib/mysql
   teamCity:
     image: jetbrains/teamcity-server
     ports:
-    - 8111:8111
+      - 8111:8111
     volumes:
-    - $DOCKER_V_PATH/teamcity-publish-iOS/teamcity/data:/data/teamcity_server/datadir
-    #    - $DOCKER_V_PATH/teamcity-publish-iOS/teamcity/logs:/opt/teamcity/logs
+      - $DOCKER_V_PATH/teamcity-publish-iOS/teamcity/data:/data/teamcity_server/datadir
+      - $DOCKER_V_PATH/teamcity-publish-iOS/teamcity/logs:/opt/teamcity/logs
     depends_on:
-    - mysql
+      - mysql
