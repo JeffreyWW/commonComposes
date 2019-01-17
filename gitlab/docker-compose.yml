@@ -1,0 +1,11 @@
+version: '3'
+services:
+  gitlab:
+    image: beginor/gitlab-ce
+    volumes:
+      - $DOCKER_V_PATH/gitlab/etc:/etc/gitlab
+      - $DOCKER_V_PATH/gitlab/log:/var/log/gitlab
+      - $DOCKER_V_PATH/gitlab/data:/var/opt/gitlab
+    ports:
+      - 81:80
+
