@@ -1,0 +1,7 @@
+version: '3'
+services:
+  centos:
+    image: centos
+#    volumes:
+#      - $DOCKER_V_PATH/centos/data:/centos-data
+    command: [ "/bin/bash" ]
