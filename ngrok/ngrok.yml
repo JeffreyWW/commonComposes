@@ -1,18 +1,18 @@
 server_addr: "tunnel.jeffreywei.cn:4443"
 trust_host_root_certs: false
 tunnels:
-  ssh:
-    remote_port: 38721
-    proto:
-      tcp: 22
-  teamcity:
-    proto:
-      http: 8111
   vue:
     proto:
       http: 1024
-  teamcity-agent:
-    remote_port: 9091
-    proto:
-      tcp: 9090
-#        ngrok -config=ngrok.yml start vue
+#  ssh:
+#    remote_port: 38721
+#    proto:
+#      tcp: 22
+#  teamcity:
+#    proto:
+#      http: 8111
+
+#  teamcity-agent:
+#    remote_port: 9091
+#    proto:
+#      tcp: 9090
