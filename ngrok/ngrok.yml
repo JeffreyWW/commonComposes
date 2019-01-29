@@ -4,7 +4,7 @@ tunnels:
   vue:
     proto:
       http: 1024
-  comcat:
+  tomcat:
     proto:
       http: 8080
 #  ssh:
