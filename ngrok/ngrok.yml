@@ -4,6 +4,9 @@ tunnels:
   vue:
     proto:
       http: 1024
+  comcat:
+    proto:
+      http:8080
 #  ssh:
 #    remote_port: 38721
 #    proto:
