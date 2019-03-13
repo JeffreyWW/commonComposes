@@ -3,7 +3,7 @@ services:
   ngrok:
     image: oddrationale/docker-shadowsocks
     #纯命令
-    #docker run -p 1022:1022 --name vpn -d oddrationale/docker-shadowsocks -s 0.0.0.0 0 -p 1022 -k jeffrey -m aes-256-cfb
+    docker run -p 1022:1022 --name vpn -d oddrationale/docker-shadowsocks -s 0.0.0.0 -p 1022 -k jeffrey -m aes-256-cfb
     #插件 command -s 0.0.0.0 -p 1022 -k jeffrey -m aes-256-cfb
     #客户端 https://github.com/shadowsocks/ShadowsocksX-NG
 
