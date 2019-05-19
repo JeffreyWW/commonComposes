@@ -7,5 +7,6 @@ services:
     volumes:
     - $DOCKER_V_PATH/nginx/Apps:/data
     - $DOCKER_V_PATH/nginx/conf.d:/etc/nginx/conf.d
-    - $DOCKER_V_PATH/nginx/nginx.conf:/etc/nginx/nginx.conf
+#    - 可能因为启动就需要,所以下面这么配置可能有问题
+#    - $DOCKER_V_PATH/nginx/nginx.conf:/etc/nginx/nginx.conf
     restart: always
