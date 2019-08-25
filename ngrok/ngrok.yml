@@ -3,7 +3,7 @@ trust_host_root_certs: false
 tunnels:
   vue:
     proto:
-      http: 1024
+      http: 18241
   tomcat:
     proto:
       http: 8080

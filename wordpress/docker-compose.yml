@@ -5,7 +5,7 @@ services:
       - mysql
     image: wordpress
     ports:
-      - 5001:80
+      - 80:80
     #    hostname: php
     #    networks:
     #      wordpress:
