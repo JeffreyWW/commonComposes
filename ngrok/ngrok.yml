@@ -7,6 +7,9 @@ tunnels:
   tomcat:
     proto:
       http: 8080
+  teamcity:
+    proto:
+      http: 9090
 #  ssh:
 #    remote_port: 38721
 #    proto:
