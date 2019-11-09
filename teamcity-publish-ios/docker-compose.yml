@@ -7,6 +7,9 @@ services:
     volumes:
       - $DOCKER_V_PATH/teamcity-publish-iOS/mysql/data:/var/lib/mysql
   teamCity:
+    environment:
+      - TZ=Asia/Shanghai
+#      - TZ=CST-8
     image: jetbrains/teamcity-server
     ports:
       - 8111:8111
