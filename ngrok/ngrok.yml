@@ -9,7 +9,7 @@ tunnels:
       http: 8080
   teamcity:
     proto:
-      http: 9090
+      http: 8111
 #  ssh:
 #    remote_port: 38721
 #    proto:

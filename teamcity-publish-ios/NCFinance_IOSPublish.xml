@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" uuid="ac0209d4-467d-46e3-821b-0ac8dfb7fb0f" xsi:noNamespaceSchemaLocation="https://www.jetbrains.com/teamcity/schemas/2018.1/project-config.xsd">
+  <name>iOSPublish</name>
+  <description>iOS发布模板</description>
+  <settings>
+    <options>
+      <option name="artifactRules" value="Archive/%build.number%/iOS.png" />
+    </options>
+    <parameters>
+      <param name="bundleId" value="修改为项目bundleId,上传fir用" spec="text display='hidden' validationMode='not_empty'" />
+      <param name="firApiToken" value="修改为fir的token,注册后即可获得" spec="text display='hidden' validationMode='not_empty'" />
+      <param name="firSubUrl" value="先手动上传一次fir,获取到子域名后覆盖这里" spec="text validationMode='not_empty' display='hidden'" />
+      <param name="scheme" value="点击Edit,进去后再点击Edit,默认为选择模式,左边为teamcity打包的时候显示选择的项,=&gt;符号右边为对应scheme名字,此行删除,并设置为需要默认的scheme名" spec="select data_2='NCFinance' data_1='NCFinanceQA' display='normal'" />
+      <param name="workspaceName" value="项目的workspace名" spec="text validationMode='not_empty' display='hidden'" />
+    </parameters>
+    <build-runners>
+      <runner id="RUNNER_4" name="pod install" type="simpleRunner">
+        <parameters>
+          <param name="script.content"><![CDATA[export LANG=en_US.UTF-8;
+pod install]]></param>
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use.custom.script" value="true" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_1" name="编译压缩" type="simpleRunner">
+        <parameters>
+          <param name="script.content" value="xcodebuild -workspace %workspaceName%.xcworkspace -scheme %scheme% clean archive -archivePath Archive/%build.number%/%scheme%.xcarchive" />
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use.custom.script" value="true" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_2" name="导出ipa" type="simpleRunner">
+        <parameters>
+          <param name="script.content" value="xcodebuild -exportArchive -archivePath %scheme%.xcarchive -exportOptionsPlist ../../../../../exportOptionsPlist/%scheme%.plist -exportPath ./" />
+          <param name="teamcity.build.workingDir" value="Archive/%build.number%" />
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use.custom.script" value="true" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_3" name="fir上传" type="simpleRunner">
+        <parameters>
+          <param name="script.content"><![CDATA[# 结束后即生产环境名字为空,打包上传不用添加后缀
+echo "获取fir上传token中.......";
+curl -o fir.json \
+     -X "POST" "http://api.fir.im/apps" \
+     -H "Content-Type: application/json" \
+     -d "{\"type\":\"ios\", \"bundle_id\":\"%bundleId%\", \"api_token\":\"%firApiToken%\"}"
+echo "获取token成功,开始上传包...";
+#上传包
+id=$(jq -r '.cert.icon' fir.json);
+ipaKey=$(jq -r '.cert.binary.key' fir.json);
+ipaToken=$(jq -r '.cert.binary.token' fir.json);
+ipaUrl=$(jq -r '.cert.binary.upload_url' fir.json);
+
+curl   -o response.json             \
+       -F "key=$ipaKey"              \
+       -F "token=$ipaToken"             \
+       -F "file=@%scheme%.ipa"            \
+       -F "x:name=%system.teamcity.projectName%"             \
+       -F "x:build=%build.number%"             \
+       -F "x:release_type=Adhoc"   \
+       -F "x:changelog=%firChangeLog%"       \
+       $ipaUrl;
+releaseId=$(jq -r '.release_id' response.json);
+ipaPath=https://fir.im/%firSubUrl%?release_id=${releaseId};
+echo "包上传完成,开始生成二维码...";
+qrencode -o iOS.png -s 100 $ipaPath;
+echo "二维码生成完成."]]></param>
+          <param name="teamcity.build.workingDir" value="Archive/%build.number%" />
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use.custom.script" value="true" />
+        </parameters>
+      </runner>
+      <runner id="RUNNER_7" name="蒲公英上传" type="simpleRunner">
+        <parameters>
+          <param name="script.content"><![CDATA[echo "开始上传到蒲公英...";
+curl -o result.json \
+-F "file=@%scheme%.ipa" \
+-F "uKey=52e64424da44ffc237b2888e9372a40d" \
+-F "_api_key=e41855691cd22f09dbded7b265160986" \
+https://www.pgyer.com/apiv1/app/upload
+
+appQRCodeURL=$(jq -r '.data.appQRCodeURL' result.json);
+echo "上传完成,二维码地址为:";
+echo $appQRCodeURL
+
+echo "开始下载二维码...";
+curl -o qrCode.png \
+https://www.pgyer.com/app/qrcodeHistory/9c3f1942dd23b461228796495d391f2683f429ad37fbc19a6fd4f39b8c1f0972
+echo "下载完成...";]]></param>
+          <param name="teamcity.build.workingDir" value="Archive/%build.number%" />
+          <param name="teamcity.step.mode" value="default" />
+          <param name="use.custom.script" value="true" />
+        </parameters>
+      </runner>
+    </build-runners>
+    <vcs-settings />
+    <requirements />
+    <build-triggers />
+    <cleanup />
+  </settings>
+</template>
+
