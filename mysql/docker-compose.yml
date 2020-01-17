@@ -5,9 +5,10 @@ services:
 #      - SET_CONTAINER_TIMEZONE=true
 #      - CONTAINER_TIMEZONE=Asia/Shanghai
       - Asia/Shanghai
+    volumes:
+      - $DOCKER_V_PATH/mysql/data:/var/lib/mysql
     env_file:
       - mysql.env
     image: mysql:5.6
     ports:
       - 3306:3306
-
