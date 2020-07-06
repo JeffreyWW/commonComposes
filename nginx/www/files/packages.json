@@ -1,0 +1,20 @@
+{
+  "list": [
+    {
+      "identifier": "home",
+      "build": 2
+    },
+    {
+      "identifier": "login",
+      "build": 1
+    },
+    {
+      "identifier": "mine",
+      "build": 1
+    },
+    {
+      "identifier": "test",
+      "build": 1
+    }
+  ]
+}
