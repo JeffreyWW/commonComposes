@@ -6,6 +6,7 @@ services:
     - 3444:80
     volumes:
     - $DOCKER_V_PATH/nginx/www:/www
+    - $DOCKER_V_PATH/nginx/cert:/cert
     - $DOCKER_V_PATH/nginx/conf.d:/etc/nginx/conf.d
 #    - 启动下面这行,前提是环境变量路径设置好,并且nginx.conf也有一份默认的在服务器对应的路径里
 #    - $DOCKER_V_PATH/nginx/nginx.conf:/etc/nginx/nginx.conf
